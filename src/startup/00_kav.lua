@@ -138,6 +138,16 @@ function drawAdvancedPrompt(type, blocked, name)
     print("Invalid input, cancelling")
     pass = false
   end
+
+  term.setTextColor(oldTXT)
+  term.setBackgroundColor(oldBG)
+  term.setCursorPos(1,1)
+  term.clear()
+  return pass
+
+end
+
+function drawNormalPrompt(type, name, blocked)
   print("Are you sure you want to download " .. name .. "?")
   if blocked then
       if term.isColor() then
@@ -180,6 +190,7 @@ if http then
       end
     end
     if kav.prompt("the link " .. url, blocked) then
+    if kav.prompt("web", blocked, url) then
       return get(url, headers)
      else
      return  false, "URL Blocked by kav"
@@ -190,7 +201,7 @@ end
 
 
 _G.os.shutdown = function()
-  if kav.shutdownPrompt() then
+  if kav.prompt("shutdown", false) then
     shutdown()
   else
     return
@@ -198,7 +209,7 @@ _G.os.shutdown = function()
 end
 
 _G.os.reboot = function()
-  if kav.rebootPrompt() then
+  if kav.prompt("reboot", false) then
     reboot()
   else
     return
