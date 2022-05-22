@@ -161,36 +161,11 @@ function drawAdvancedPrompt(type, blocked, name)
   end
 end
 
-kav.shutdownPrompt = function()
+kav.prompt = function(type, name, blocked)
   if kav.advancedMenu then
-    local oldBG = term.getBackgroundColor()
-    local oldTXT = term.getTextColor()
-    local xSize, ySize = term.getSize()
-    term.setBackgroundColor(colors.white)
-    term.setTextColor(colors.black)   
-    term.clear()
-    term.setCursorPos(2,2)
-    
-    kav.beep()
-    print("> Are you sure you want to shut down?")
-    term.setCursorPos(2,ySize - 2)
-    term.write("(y/n) > ")
-
-    local input = read()
-    local pass
-    if input == "y" then
-      pass = true
-    elseif input == "n" then
-      pass = false
-    else
-      print("Invalid input, cancelling")
-      pass = false
-    end
-    term.setTextColor(oldTXT)
-    term.setBackgroundColor(oldBG)
-    term.setCursorPos(1,1)
-    term.clear()
-    return pass
+    return drawAdvancedPrompt(type, name, blocked)
+  else
+    return drawNormalPrompt(type, name, blocked)
   end
 end
 
