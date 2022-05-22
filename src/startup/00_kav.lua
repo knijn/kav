@@ -4,7 +4,7 @@ local get = _G.http.get
 local shutdown = _G.os.shutdown
 local reboot = _G.os.reboot
 
-local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
+local kavServer = "https://raw.githubusercontent.com/knijn/kav/main/web/"
 
 kav = {}
 kav.version = 1.0
@@ -17,7 +17,7 @@ warn = function(v)
   term.setTextColor(oldTXT)
 end
 
-local blockedPastebinHandle = get(kavServer .. "/blockedPastebin.json")
+local blockedPastebinHandle = get(kavServer .. "blockedPastebin.json")
 if not blockedPastebinHandle then
   kav.blockedPastebin = {}
   warn("WARN: Wasn't able to discover blocked pastebins from the server")
@@ -29,7 +29,7 @@ blockedPastebinHandle.close()
 
 
 
-local blockedWebHandle = get(kavServer .. "/blockedWeb.json")
+local blockedWebHandle = get(kavServer .. "blockedWeb.json")
 if not blockedWebHandle then
   kav.blockedWeb = {}
   warn("WARN: Wasn't able to discover blocked urls from the server")
