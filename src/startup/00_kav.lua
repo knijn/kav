@@ -189,7 +189,6 @@ if http then
         return
       end
     end
-    if kav.prompt("the link " .. url, blocked) then
     if kav.prompt("web", blocked, url) then
       return get(url, headers)
      else
