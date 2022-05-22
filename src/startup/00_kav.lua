@@ -194,38 +194,6 @@ kav.shutdownPrompt = function()
   end
 end
 
-kav.rebootPrompt = function()
-  if kav.advancedMenu then
-    local oldBG = term.getBackgroundColor()
-    local oldTXT = term.getTextColor()
-    local xSize, ySize = term.getSize()
-    term.setBackgroundColor(colors.white)
-    term.setTextColor(colors.black)   
-    term.clear()
-    term.setCursorPos(2,2)
-    
-    kav.beep()
-    print("> Are you sure you want to reboot?")
-    term.setCursorPos(2,ySize - 2)
-    term.write("(y/n) > ")
-
-    local input = read()
-    local pass
-    if input == "y" then
-      pass = true
-    elseif input == "n" then
-      pass = false
-    else
-      print("Invalid input, cancelling")
-      pass = false
-    end
-    term.setTextColor(oldTXT)
-    term.setBackgroundColor(oldBG)
-    term.setCursorPos(1,1)
-    term.clear()
-    return pass
-  end
-end
 -- http override
 if http then
   _G.http.get = function(url, headers)
