@@ -80,59 +80,63 @@ kav.beep = function()
   end
 end
 
-kav.prompt = function(name, blocked)
-  local isHTTP = http.checkURL(name)
-  if isHTTP then
-    if settings.get("kav.downloadPrompt") == false then
-      return
-    end
-  else
-    if settings.get("kav.pastebinPrompt") == false then
-      return
-    end
-  end
-  if kav.advancedMenu then
-    local oldBG = term.getBackgroundColor()
-    local oldTXT = term.getTextColor()
-    local xSize, ySize = term.getSize()
-    if blocked then
-      term.setBackgroundColor(colors.red)
-      term.setTextColor(colors.white)  
-    else
-      term.setBackgroundColor(colors.white)
-      term.setTextColor(colors.black)  
-    end
-     
-    term.clear()
-    term.setCursorPos(2,2)
-    
-    kav.beep()
-    print("> Are you sure you want to download " .. name .. "?")
-    if blocked then
-      local oldTXT2 = term.getTextColor()
-      term.setTextColor(colors.orange)
-      term.setCursorPos(2,ySize - 3)
-      print("!! This program is known to be dangerous!")
-      term.setTextColor(oldTXT2)
-    end
-    term.setCursorPos(2,ySize - 2)
-    term.write("(y/n) > ")
+function drawAdvancedPrompt(type, blocked, name) 
+  
+  local oldBG = term.getBackgroundColor()
+  local oldTXT = term.getTextColor()
+  local xSize, ySize = term.getSize()
+  
+  local bgColor = colors.white
+  if blocked then bgColor = colors.red end
+  term.setBackgroundColor(bgColor)
+  term.setTextColor(colors.black)
+  term.setCursorPos(2,2)
+  term.clear()
 
-    local input = read()
-    local pass
-    if input == "y" then
-      pass = true
-    elseif input == "n" then
-      pass = false
-    else
-      print("Invalid input, cancelling")
-      pass = false
+  kav.beep()
+
+  if type == "pastebin" then
+    if settings.get("kav.pastebinPrompt") == false then
+      drawBlank()
+      return
     end
-    term.setTextColor(oldTXT)
-    term.setBackgroundColor(oldBG)
-    term.setCursorPos(1,1)
-    term.clear()
-    return pass
+    term.write("> Are you sure you want to download the pastebin " .. name .. "?")
+  elseif type == "web" then
+    if settings.get("kav.downloadPrompt") == false then
+      drawBlank()
+      return true
+    end
+    term.write("> Are you sure you want to download " .. name .. "?")
+  elseif type == "shutdown" then
+    if settings.get("kav.shutdownPrompt") == false then
+      return true
+    end
+    term.write("> Are you sure you want to shut down?")
+  elseif type == "reboot" then
+    if settings.get("kav.rebootPrompt") == false then
+      drawBlank()
+      return
+    end
+    term.write("> Are you sure you want to reboot?")
+  end
+
+  if blocked then -- Check if the program is on the block list and let the user know
+    term.setCursorPos(2,ySize - 3)
+    warn("!! This program is known to be malicious")
+  end
+  
+  term.setCursorPos(2,ySize - 2)
+  term.write("(y/n) > ")
+
+  local input = read()
+  local pass
+  if input == "y" then
+    pass = true
+  elseif input == "n" then
+    pass = false
+  else
+    print("Invalid input, cancelling")
+    pass = false
   end
   print("Are you sure you want to download " .. name .. "?")
   if blocked then
