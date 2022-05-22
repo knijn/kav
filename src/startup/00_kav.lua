@@ -10,8 +10,8 @@ kav = {}
 kav.backendVersion = 1.0
 kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() or false
 
-warn = function(v)
-  oldTXT = term.getTextColor()
+local function warn(v)
+  local oldTXT = term.getTextColor()
   term.setTextColor(colors.orange)
   print(v)
   term.setTextColor(oldTXT)
@@ -63,7 +63,7 @@ kav.pastebinCheck = function(id)
   return allowed
 end
 
-function drawBlank()
+local function drawBlank()
   term.setBackgroundColor(colors.black)
   term.setTextColor(colors.white)
   term.clear()
@@ -79,7 +79,7 @@ kav.beep = function()
   end
 end
 
-function drawAdvancedPrompt(type, blocked, name) 
+local function drawAdvancedPrompt(type, blocked, name) 
   
   local oldBG = term.getBackgroundColor()
   local oldTXT = term.getTextColor()
@@ -146,7 +146,7 @@ function drawAdvancedPrompt(type, blocked, name)
 
 end
 
-function drawNormalPrompt(type, name, blocked)
+local function drawNormalPrompt(type, name, blocked)
   print("Are you sure you want to download " .. name .. "?")
   if blocked then
       if term.isColor() then
