@@ -8,4 +8,4 @@ kav includes:
 
 ## Install
 It is recommended to install kav on an empty computer, but you can also install it on an already used computer
-Run `wget run https://raw.githubusercontent.com/knijn/kav/install.lua`
+Run `wget run https://raw.githubusercontent.com/knijn/kav/main/install.lua`
