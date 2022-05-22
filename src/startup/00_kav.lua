@@ -56,6 +56,7 @@ kav.pastebinCheck = function(id)
   for _,o in pairs(kav.blockedPastebin) do
     if o == id then
         allowed = false
+        break // Suggested by Lupus590
     end
   end
 
