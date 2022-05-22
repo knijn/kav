@@ -1,0 +1,8 @@
+{
+  [ "shell.allow_startup" ] = true,
+  [ "kav.rebootPrompt" ] = "false",
+  [ "kav.pastebinPrompt" ] = true,
+  [ "kav.downloadPrompt" ] = true,
+  [ "kav.advancedMenu" ] = false,
+  [ "kav.shutdownPrompt" ] = true,
+}

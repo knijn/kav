@@ -1,0 +1,1 @@
+java -jar ccemux-launcher.jar --start-dir src/
