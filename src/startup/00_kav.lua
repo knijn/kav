@@ -57,6 +57,7 @@ kav.pastebinCheck = function(id)
     if o == id then
         allowed = false
         break // Suggested by Lupus590
+        break -- Suggested by Lupus590
     end
   end
 
