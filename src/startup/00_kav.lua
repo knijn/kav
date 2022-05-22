@@ -4,7 +4,7 @@ local get = _G.http.get
 local shutdown = _G.os.shutdown
 local reboot = _G.os.reboot
 
-local kavServer = "http://localhost:5500"
+local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
 kav = {}
 kav.backendVersion = 1.0
