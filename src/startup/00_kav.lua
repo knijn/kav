@@ -73,9 +73,9 @@ end
 kav.beep = function()
   if peripheral.find("speaker") then
     local speaker = peripheral.find("speaker")
-    speaker.playNote(chime, 3, 12)
+    speaker.playNote("minecraft:block.note_block.chime", 3, 12)
     sleep(0.5)
-    speaker.playNote(chime, 3, 12)
+    speaker.playNote("minecraft:block.note_block.chime", 3, 12)
   end
 end
 
