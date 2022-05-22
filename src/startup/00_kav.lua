@@ -7,7 +7,7 @@ local reboot = _G.os.reboot
 local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
 kav = {}
-kav.backendVersion = 1.0
+kav.version = 1.0
 kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() or false
 
 warn = function(v)

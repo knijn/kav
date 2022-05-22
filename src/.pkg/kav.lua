@@ -1,6 +1,4 @@
 local args = { ... }
-local version = 1.0
-
 
 local printUsage = function()
   print("Usages:")
@@ -73,8 +71,7 @@ elseif args[1] == "info" then
     print("kav is not installed!!")
     return
   end
-  print("Frontend Version: " .. tostring(version))
-  print("Backend Version: " .. tostring(kav.backendVersion))
+  print("Version: " .. tostring(kav.version))
 elseif args[1] == "reset" then
   kav.reset()
 end
