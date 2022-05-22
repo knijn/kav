@@ -64,6 +64,13 @@ kav.pastebinCheck = function(id)
   return allowed
 end
 
+function drawBlank()
+  term.setBackgroundColor(colors.black)
+  term.setTextColor(colors.white)
+  term.clear()
+  term.setCursorPos(1,1)
+end
+
 kav.beep = function()
   if peripheral.find("speaker") then
     local speaker = peripheral.find("speaker")
