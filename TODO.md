@@ -1,0 +1,2 @@
+- Fix up kav.drawNormalPrompt() to change based on the type
+- Make the settings work
