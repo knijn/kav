@@ -215,19 +215,21 @@ kav.rebootPrompt = function()
   end
 end
 -- http override
-
-_G.http.get = function(url, headers)
-  local blocked = false
-  for i,o in pairs(kav.blockedWeb) do
-    if o == url then
-      blocked = true
+if http then
+  _G.http.get = function(url, headers)
+    local blocked = false
+    for i,o in pairs(kav.blockedWeb) do
+      if o == url then
+        blocked = true
+        return
+      end
+    end
+    if kav.prompt("the link " .. url, blocked) then
+      return get(url, headers)
+     else
+     return  false, "URL Blocked by kav"
     end
   end
-  if kav.prompt("the link " .. url, blocked) then
-    return get(url, headers)
-   else
-   return
- end
 end
 
 
