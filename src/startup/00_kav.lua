@@ -8,7 +8,7 @@ local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
 kav = {}
 kav.backendVersion = 1.0
-kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() or false
+kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() or false -- or false is not needed here, term.isColor will return false, also what someone is on an advansed computer and wants the normal prompt?
 
 local function warn(v)
   local oldTXT = term.getTextColor()
@@ -19,7 +19,7 @@ end
 
 local blockedPastebinHandle = get(kavServer .. "/blockedPastebin.json")
 if not blockedPastebinHandle then
-  kav.blockedPastebin = {}
+  kav.blockedPastebin = {} -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
   warn("WARN: Wasn't able to discover blocked pastebins from the server")
 else
   kav.blockedPastebin = textutils.unserialiseJSON(blockedPastebinHandle.readAll())
