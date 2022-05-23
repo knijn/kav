@@ -8,7 +8,7 @@ local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
 kav = {}
 kav.backendVersion = 1.0
-kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() or false -- or false is not needed here, term.isColor will return false, also what someone is on an advansed computer and wants the normal prompt?
+kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() -- what someone is on an advansed computer and wants the normal prompt?
 
 local function warn(v)
   local oldTXT = term.getTextColor()
