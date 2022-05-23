@@ -8,10 +8,10 @@ local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
 kav = {}
 kav.backendVersion = 1.0
-kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() or false
+kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() -- what if someone is on an advanced computer and wants the normal prompt?
 
-warn = function(v)
-  oldTXT = term.getTextColor()
+local function warn(v)
+  local oldTXT = term.getTextColor()
   term.setTextColor(colors.orange)
   print(v)
   term.setTextColor(oldTXT)
@@ -19,7 +19,7 @@ end
 
 local blockedPastebinHandle = get(kavServer .. "/blockedPastebin.json")
 if not blockedPastebinHandle then
-  kav.blockedPastebin = {}
+  kav.blockedPastebin = {} -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
   warn("WARN: Wasn't able to discover blocked pastebins from the server")
 else
   kav.blockedPastebin = textutils.unserialiseJSON(blockedPastebinHandle.readAll())
@@ -63,7 +63,7 @@ kav.pastebinCheck = function(id)
   return allowed
 end
 
-function drawBlank()
+local function drawBlank()
   term.setBackgroundColor(colors.black)
   term.setTextColor(colors.white)
   term.clear()
@@ -73,13 +73,13 @@ end
 kav.beep = function()
   if peripheral.find("speaker") then
     local speaker = peripheral.find("speaker")
-    speaker.playNote(chime, 3, 12)
+    speaker.playNote("chime", 3, 12)
     sleep(0.5)
-    speaker.playNote(chime, 3, 12)
+    speaker.playNote("chime", 3, 12)
   end
 end
 
-function drawAdvancedPrompt(type, blocked, name) 
+local function drawAdvancedPrompt(type, blocked, name) 
   
   local oldBG = term.getBackgroundColor()
   local oldTXT = term.getTextColor()
@@ -146,7 +146,7 @@ function drawAdvancedPrompt(type, blocked, name)
 
 end
 
-function drawNormalPrompt(type, name, blocked)
+local function drawNormalPrompt(type, name, blocked)
   print("Are you sure you want to download " .. name .. "?")
   if blocked then
       if term.isColor() then
