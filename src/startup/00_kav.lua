@@ -4,7 +4,7 @@ local get = _G.http.get
 local shutdown = _G.os.shutdown
 local reboot = _G.os.reboot
 
-local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
+local kavServer = "https://raw.githubusercontent.com/knijn/kav/dev/web/programData.json"
 
 kav = {}
 kav.backendVersion = 1.0
@@ -17,27 +17,35 @@ local function warn(v)
   term.setTextColor(oldTXT)
 end
 
-local blockedPastebinHandle = get(kavServer .. "/blockedPastebin.json")
-if not blockedPastebinHandle then
-  kav.blockedPastebin = {} -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
-  warn("WARN: Wasn't able to discover blocked pastebins from the server")
-else
-  kav.blockedPastebin = textutils.unserialiseJSON(blockedPastebinHandle.readAll())
+local kavServerDataHandle = get(kavServer)
+if not kavServerDataHandle then
+  kavServerDataHandle = {}
+  warn("WARN: Wasn't able to communicate to the kav server, blocked list might be out of date")
 end
-blockedPastebinHandle.close()
+local kavData = textutils.unserialiseJSON(kavServerDataHandle.readAll())
+kavServerDataHandle.close()
 
-
-
-
-local blockedWebHandle = get(kavServer .. "/blockedWeb.json")
-if not blockedWebHandle then
-  kav.blockedWeb = {}
-  warn("WARN: Wasn't able to discover blocked urls from the server")
-else
-  kav.blockedWeb = textutils.unserialiseJSON(blockedWebHandle.readAll())
-  
-end
-blockedWebHandle.close()
+--local blockedPastebinHandle = get(kavServer .. "blockedPastebin.json")
+--if not blockedPastebinHandle then
+--  kav.blockedPastebin = {} -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
+--  warn("WARN: Wasn't able to discover blocked pastebins from the server")
+--else
+--  kav.blockedPastebin = textutils.unserialiseJSON(blockedPastebinHandle.readAll())
+--end
+--blockedPastebinHandle.close()
+--
+--
+--
+--
+--local blockedWebHandle = get(kavServer .. "blockedWeb.json")
+--if not blockedWebHandle then
+--  kav.blockedWeb = {}
+--  warn("WARN: Wasn't able to discover blocked urls from the server")
+--else
+--  kav.blockedWeb = textutils.unserialiseJSON(blockedWebHandle.readAll())
+--  
+--end
+--blockedWebHandle.close()
 
 kav.reset = function()
   settings.set("kav.advancedMenu", false)
@@ -51,16 +59,35 @@ kav.reset = function()
   settings.save()
 end
 
-kav.pastebinCheck = function(id)
-  local allowed = true
-  for _,o in pairs(kav.blockedPastebin) do
-    if o == id then
-        allowed = false
-        break -- Suggested by Lupus590
+kav.check = function(v, type)
+  if type == "web" then
+    if kavData.blockedWeb[v] then
+      local blocked = kavData.blockedWeb[v].blocked
+    else
+      local blocked = false
     end
-  end
 
-  return allowed
+    if blocked then
+      allowed = false
+    else
+      allowed = true
+    end
+    return allowed, blocked
+  elseif type == "pastebin" then
+    if kavData.blockedWeb[v] then
+      local blocked = kavData.blockedPastebin[v].blocked
+    else
+      blocked = false
+    end
+
+    if blocked then
+      allowed = false
+    else
+      allowed = true
+    end
+  
+    return allowed, blocked
+  end
 end
 
 local function drawBlank()
@@ -96,8 +123,8 @@ local function drawAdvancedPrompt(type, blocked, name)
 
   if type == "pastebin" then
     if settings.get("kav.pastebinPrompt") == false then
-      drawBlank()
-      return
+      --drawBlank()
+      return true
     end
     term.write("> Are you sure you want to download the pastebin " .. name .. "?")
   elseif type == "web" then
@@ -181,17 +208,11 @@ end
 -- http override
 if http then
   _G.http.get = function(url, headers)
-    local blocked = false
-    for i,o in pairs(kav.blockedWeb) do
-      if o == url then
-        blocked = true
-        return
-      end
-    end
+    local _,blocked = kav.check(url,"web")
     if kav.prompt("web", blocked, url) then
       return get(url, headers)
-     else
-     return  false, "URL Blocked by kav"
+    else
+      return  false, "URL Blocked by kav"
     end
   end
 end

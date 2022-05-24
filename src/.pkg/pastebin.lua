@@ -44,14 +44,9 @@ local function get(url)
         return
     end
     -- Pastebin check by kav
-    if not kav.pastebinCheck(paste) then
-       if not kav.prompt("the paste " .. paste, true) then
-           io.stderr:write("Cancelling operation.\n")
-       end
-    else
-        if not kav.prompt("the paste " .. paste, false) then
-            io.stderr:write("Cancelling operation.\n")
-        end
+    local _,blocked = kav.check(paste,"pastebin")
+    if not kav.prompt("pastebin",paste,blocked) then
+        io.stderr:write("blocked by kav")
     end
     write("Connecting to pastebin.com... ")
     -- Add a cache buster so that spam protection is re-checked
