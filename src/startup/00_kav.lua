@@ -152,7 +152,7 @@ local function drawAdvancedPrompt(type, name, blocked)
 
 end
 
-local function drawNormalPrompt(type, name, blocked)
+local function drawNormalPrompt(type, name, blocked) -- you always assume that you're downloading here bu the other prompt has shutdown and reboot prompts, nothing is checking that this prompt isn't getting used for shutdown and reboot prompting
   print("Are you sure you want to download " .. name .. "?")
   if blocked then
       if term.isColor() then
