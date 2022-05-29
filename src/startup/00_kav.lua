@@ -79,7 +79,24 @@ kav.beep = function()
   end
 end
 
-local function drawAdvancedPrompt(type, blocked, name) 
+-- https://github.com/Lupus590-CC/CC-Random-Code/blob/master/src/confirmLoop.lua
+-- Unlicense, free use - you can remove this credit if you want.
+function confirmLoop(...)
+  local prompt = {...}
+  if #prompt > 1 then error("Too many args",2) end
+  prompt = prompt[1] or ""
+  if type(prompt) ~= "string" then error("Bad arg, expected string",2) end
+  print(prompt.." (Y/N)")
+  local input
+  repeat
+    local _, i = os.pullEvent("char")
+    input = i:lower()
+  until input == "y" or input == "n"
+  print(input:upper())
+  return (input == "y")
+end
+
+local function drawAdvancedPrompt(type, name, blocked)
   
   local oldBG = term.getBackgroundColor()
   local oldTXT = term.getTextColor()
@@ -125,18 +142,7 @@ local function drawAdvancedPrompt(type, blocked, name)
   end
   
   term.setCursorPos(2,ySize - 2)
-  term.write("(y/n) > ")
-
-  local input = read()
-  local pass
-  if input == "y" then
-    pass = true
-  elseif input == "n" then
-    pass = false
-  else
-    print("Invalid input, cancelling")
-    pass = false
-  end
+  local pass = confirmLoop("")
 
   term.setTextColor(oldTXT)
   term.setBackgroundColor(oldBG)
@@ -159,15 +165,8 @@ local function drawNormalPrompt(type, name, blocked)
       end
   end
   term.write("(y/n) > ")
-  local input = read()
-  if input == "y" then
-    return true
-  elseif input == "n" then
-    return false
-  else
-    print("Invalid input, cancelling")
-    return false
-  end
+  
+  return confirmLoop("")
 end
 
 kav.prompt = function(type, name, blocked)
