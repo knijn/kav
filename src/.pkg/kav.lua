@@ -60,13 +60,14 @@ if args[1] == "settings" then
 elseif args[1] == "info" then
   if args[2] == "blocked" then
     print("Items blocked for Pastebin: ")
-    for i,o in pairs(kav.blockedPastebin) do
-      print("- " .. o)
+    for i,o in pairs(kav.blockedItems.blockedPastebin) do
+      print("- " .. o.paste)
     end
     print("Items blocked for Web: ")
-    for i,o in pairs(kav.blockedWeb) do
-      print("- " .. o)
+    for i,o in pairs(kav.blockedItems.blockedWeb) do
+      print("- " .. o.url)
     end
+    return
   end
   
   if not kav then

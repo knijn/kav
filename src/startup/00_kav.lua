@@ -8,7 +8,7 @@ local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
 kav = {}
 kav.backendVersion = 1.0
-kav.advancedMenu = settings.get("kav.advancedMenu") or term.isColor() -- what if someone is on an advanced computer and wants the normal prompt?
+kav.advancedMenu = settings.get("kav.advancedMenu",false)
 
 local function warn(v)
   local oldTXT = term.getTextColor()
@@ -17,27 +17,32 @@ local function warn(v)
   term.setTextColor(oldTXT)
 end
 
-local blockedPastebinHandle = get(kavServer .. "/blockedPastebin.json")
-if not blockedPastebinHandle then
-  kav.blockedPastebin = {} -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
-  warn("WARN: Wasn't able to discover blocked pastebins from the server")
+
+
+local blockedHandle = get(kavServer .. "/blocked.json?cb=" .. os.epoch())
+if not blockedHandle then
+  kav.blockedItems = {}
+  warn("WARN: Wasn't able to discover blocked urls from the server") -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
+  print("Trying to find blocked items from disk...")
+  if not fs.exists(".blocked") then
+    warn("WARN: Disk Cache not found... KAV will not work fully without connecting to the internet first")
+    return
+  end
+  local fileHandle = fs.open(".blocked","r")
+  kav.blockedItems = textutils.unserialiseJSON(fileHandle.readAll())
+  fileHandle.close()
+  print("Was able to recover from disk")
 else
-  kav.blockedPastebin = textutils.unserialiseJSON(blockedPastebinHandle.readAll())
+  local fileHandle = fs.open(".blocked","w")
+  fileHandle.write(blockedHandle.readAll())
+  fileHandle.close()
+  kav.blockedItems = textutils.unserialiseJSON(blockedHandle.readAll())
 end
-blockedPastebinHandle.close()
-
-
-
-
-local blockedWebHandle = get(kavServer .. "/blockedWeb.json")
-if not blockedWebHandle then
-  kav.blockedWeb = {}
-  warn("WARN: Wasn't able to discover blocked urls from the server")
-else
-  kav.blockedWeb = textutils.unserialiseJSON(blockedWebHandle.readAll())
-  
+if blockedHandle then
+  blockedHandle.close()
 end
-blockedWebHandle.close()
+
+
 
 kav.reset = function()
   settings.set("kav.advancedMenu", false)
@@ -53,7 +58,7 @@ end
 
 kav.pastebinCheck = function(id)
   local allowed = true
-  for _,o in pairs(kav.blockedPastebin) do
+  for _,o in pairs(kav.blockedItems.blockedPastebin) do
     if o == id then
         allowed = false
         break -- Suggested by Lupus590
@@ -110,7 +115,6 @@ local function drawAdvancedPrompt(type, name, blocked)
   term.clear()
 
   kav.beep()
-
   if type == "pastebin" then
     if settings.get("kav.pastebinPrompt") == false then
       drawBlank()
@@ -118,28 +122,28 @@ local function drawAdvancedPrompt(type, name, blocked)
     end
     term.write("> Are you sure you want to download the pastebin " .. name .. "?")
   elseif type == "web" then
-    if settings.get("kav.downloadPrompt") == false then
+    if settings.get("kav.downloadPrompt",true) == false then
       drawBlank()
       return true
     end
-    term.write("> Are you sure you want to download " .. name .. "?")
+    print("> Are you sure you want to download " .. name .. "?")
   elseif type == "shutdown" then
-    if settings.get("kav.shutdownPrompt") == false then
+    if settings.get("kav.shutdownPrompt",true) then
       return true
     end
     term.write("> Are you sure you want to shut down?")
   elseif type == "reboot" then
-    if settings.get("kav.rebootPrompt") == false then
+    if settings.get("kav.rebootPrompt,true") == false then
       drawBlank()
       return
     end
     term.write("> Are you sure you want to reboot?")
   end
 
-  if blocked then -- Check if the program is on the block list and let the user know
-    term.setCursorPos(2,ySize - 3)
-    warn("!! This program is known to be malicious")
-  end
+  --if blocked then -- Check if the program is on the block list and let the user know
+  --  term.setCursorPos(2,ySize - 3)
+  --  warn("!! This program is known to be malicious")
+  --end
   
   term.setCursorPos(2,ySize - 2)
   local pass = confirmLoop("")
@@ -153,7 +157,16 @@ local function drawAdvancedPrompt(type, name, blocked)
 end
 
 local function drawNormalPrompt(type, name, blocked) -- you always assume that you're downloading here bu the other prompt has shutdown and reboot prompts, nothing is checking that this prompt isn't getting used for shutdown and reboot prompting
-  print("Are you sure you want to download " .. name .. "?")
+  if name then
+    print("Are you sure you want to download " .. name .. "?")
+  end
+  if type == "shutdown" then
+    print("Do you want to shut down?")
+    return confirmLoop("")
+  elseif type == "reboot" then
+    print("Do you want to reboot?")
+    return confirmLoop("")
+  end
   if blocked then
       if term.isColor() then
         local oldTextColor = term.getTextColor()
@@ -164,8 +177,6 @@ local function drawNormalPrompt(type, name, blocked) -- you always assume that y
         print("!! This program is known to be a dangerous program")
       end
   end
-  term.write("(y/n) > ")
-  
   return confirmLoop("")
 end
 
@@ -177,17 +188,24 @@ kav.prompt = function(type, name, blocked)
   end
 end
 
+function string.starts(String,Start) --https://stackoverflow.com/questions/22831701/lua-read-beginning-of-a-string
+  return string.sub(String,1,string.len(Start))==Start
+end
+
+
 -- http override
 if http then
   _G.http.get = function(url, headers)
+    if string.starts(url,"https://pastebin.com") then
+      return get(url, headers)
+    end
     local blocked = false
-    for i,o in pairs(kav.blockedWeb) do
-      if o == url then
+    for i,o in pairs(kav.blockedItems.blockedWeb) do
+      if o.url == url then
         blocked = true
-        return
       end
     end
-    if kav.prompt("web", blocked, url) then
+    if kav.prompt("web", url, blocked) then
       return get(url, headers)
      else
      return  false, "URL Blocked by kav"

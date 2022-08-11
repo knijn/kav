@@ -45,12 +45,14 @@ local function get(url)
     end
     -- Pastebin check by kav
     if not kav.pastebinCheck(paste) then
-       if not kav.prompt("the paste " .. paste, true) then
+       if not kav.prompt("pastebin",paste, true) then
            io.stderr:write("Cancelling operation.\n")
+           return
        end
     else
-        if not kav.prompt("the paste " .. paste, false) then
+        if not kav.prompt("pastebin", paste, false) then
             io.stderr:write("Cancelling operation.\n")
+            return
         end
     end
     write("Connecting to pastebin.com... ")
