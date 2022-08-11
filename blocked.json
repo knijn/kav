@@ -16,5 +16,13 @@
             "severity":3,
             "type":"Potentially Unwanted Program"
         }
+    ],
+    "blockedHashes": [
+        {
+            "hash":"¡?-≡¡N⌡±u╦? án4Abz    H┴3-╥φ?$H{8",
+            "reason":"This is a privacy invasive program",
+            "severity":3,
+            "type":"Spyware"
+        }
     ]
 }
