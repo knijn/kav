@@ -6,9 +6,11 @@
             "reason":"This completely makes your computer useless",
             "severity":10,
             "type":"Malware"
-        },
+        }
+    ],
+    "blockedPastebin": [
         {
-            "url":"https://pastebin.com/7HSiHybr",
+            "paste":"7HSiHybr",
             "blocked":true,
             "reason":"This will install PotatOS, which is considered malware by some well-established groups",
             "severity":3,
