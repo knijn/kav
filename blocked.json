@@ -1,0 +1,18 @@
+{
+    "blockedWeb":[
+        {
+            "url":"https://raw.githubusercontent.com/9551-Dev/to-be-finished/main/virus.lua",
+            "blocked":true,
+            "reason":"This completely makes your computer useless",
+            "severity":10,
+            "type":"Malware"
+        },
+        {
+            "url":"https://pastebin.com/7HSiHybr",
+            "blocked":true,
+            "reason":"This will install PotatOS, which is considered malware by some well-established groups",
+            "severity":3,
+            "type":"Potentially Unwanted Program"
+        }
+    ]
+}
