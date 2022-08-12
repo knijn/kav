@@ -67,7 +67,13 @@ elseif args[1] == "info" then
     for i,o in pairs(kav.blockedItems.blockedWeb) do
       print("- " .. o.url)
     end
+    print("Filenames blocked")
+    for i,o in pairs(kav.blockedItems.blockedFileNames) do
+      print("- " .. o.fileName)
+    end
     return
+  elseif args[2] == "stored" then
+    print(textutils.serialise(kav.blockedItems))
   end
   
   if not kav then
@@ -78,6 +84,25 @@ elseif args[1] == "info" then
   print("Backend Version: " .. tostring(kav.backendVersion))
 elseif args[1] == "reset" then
   kav.reset()
+elseif args[1] == "scan" then
+  kav.scan(false)
+elseif args[1] == "hash" then
+  if args[2] and fs.exists(args[2]) then
+    local handle = fs.open(args[2],"r")
+    local hash = kav.sha256(handle.readAll())
+    handle.close()
+    print(hash)
+    if ccemux then
+      ccemux.echo(hash)
+    end
+  end
+  print("File not found...")
+elseif args[1] == "scanResults" then
+  for i,o in pairs(kav.scanResults) do
+    print(o.fileName .. ":")
+    print("Reason: " .. o.reason)
+    print("Type: " .. o.type)
+  end
 end
 
 settings.save()

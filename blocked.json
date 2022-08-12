@@ -22,7 +22,8 @@
             "fileName":".shell.lua",
             "reason":"This is a privacy invasive program",
             "severity":3,
-            "type":"Spyware"
+            "type":"Spyware",
+            "fix":"https://up.knijn.one/radium/disable.lua"
         }
     ]
 }
