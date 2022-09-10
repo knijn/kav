@@ -17,6 +17,54 @@ local function warn(v)
   term.setTextColor(oldTXT)
 end
 
+local function drawBlank()
+  term.setBackgroundColor(colors.black)
+  term.setTextColor(colors.white)
+  term.clear()
+  term.setCursorPos(1,1)
+end
+
+kav.beep = function()
+  if peripheral.find("speaker") then
+    local speaker = peripheral.find("speaker")
+    speaker.playNote("chime", 3, 12)
+    sleep(0.5)
+    speaker.playNote("chime", 3, 12)
+  end
+end
+
+kav.reset = function()
+  settings.set("kav.advancedMenu", false)
+  settings.set("kav.shutdownPrompt", true)
+  settings.set("kav.rebootPrompt", true)
+  settings.set("kav.downloadPrompt", true)
+  settings.set("kav.pastebinPrompt", true)
+  if settings.get("kav.startup") then
+    settings.unset("kav.startup")
+  end
+  settings.save()
+end
+
+-- https://github.com/Lupus590-CC/CC-Random-Code/blob/master/src/confirmLoop.lua
+-- Unlicense, free use - you can remove this credit if you want.
+function confirmLoop(...)
+  local prompt = {...}
+  if #prompt > 1 then error("Too many args",2) end
+  prompt = prompt[1] or ""
+  if type(prompt) ~= "string" then error("Bad arg, expected string",2) end
+  print(prompt.." (Y/N)")
+  local input
+  repeat
+    local _, i = os.pullEvent("char")
+    input = i:lower()
+  until input == "y" or input == "n"
+  print(input:upper())
+  return (input == "y")
+end
+
+function string.starts(String,Start) --https://stackoverflow.com/questions/22831701/lua-read-beginning-of-a-string
+  return string.sub(String,1,string.len(Start))==Start
+end
 
 kav.blockedItems = {}
 local blockedHandle = get(kavServer .. "/blocked.json?cb=" .. os.epoch())
@@ -42,63 +90,16 @@ if blockedHandle then
   blockedHandle.close()
 end
 
-
-
-kav.reset = function()
-  settings.set("kav.advancedMenu", false)
-  settings.set("kav.shutdownPrompt", true)
-  settings.set("kav.rebootPrompt", true)
-  settings.set("kav.downloadPrompt", true)
-  settings.set("kav.pastebinPrompt", true)
-  if settings.get("kav.startup") then
-    settings.unset("kav.startup")
-  end
-  settings.save()
-end
-
 kav.pastebinCheck = function(id)
   local allowed = true
   for _,o in pairs(kav.blockedItems.blockedPastebin) do
-    if o == id then
+    if o.paste == id then
         allowed = false
         break -- Suggested by Lupus590
     end
   end
 
   return allowed
-end
-
-local function drawBlank()
-  term.setBackgroundColor(colors.black)
-  term.setTextColor(colors.white)
-  term.clear()
-  term.setCursorPos(1,1)
-end
-
-kav.beep = function()
-  if peripheral.find("speaker") then
-    local speaker = peripheral.find("speaker")
-    speaker.playNote("chime", 3, 12)
-    sleep(0.5)
-    speaker.playNote("chime", 3, 12)
-  end
-end
-
--- https://github.com/Lupus590-CC/CC-Random-Code/blob/master/src/confirmLoop.lua
--- Unlicense, free use - you can remove this credit if you want.
-function confirmLoop(...)
-  local prompt = {...}
-  if #prompt > 1 then error("Too many args",2) end
-  prompt = prompt[1] or ""
-  if type(prompt) ~= "string" then error("Bad arg, expected string",2) end
-  print(prompt.." (Y/N)")
-  local input
-  repeat
-    local _, i = os.pullEvent("char")
-    input = i:lower()
-  until input == "y" or input == "n"
-  print(input:upper())
-  return (input == "y")
 end
 
 local function drawAdvancedPrompt(type, o, blocked)
@@ -131,6 +132,11 @@ local function drawAdvancedPrompt(type, o, blocked)
       return true
     end
     print("> Are you sure you want to download " .. name .. "?")
+    local curX, curY = term.getCursorPos()
+    term.setCursorPos(curX, curY + 1)
+    print("Reason: " .. o.reason)
+    print("Severity: " .. o.severity)
+    print("Type: " .. o.type)
   elseif type == "shutdown" then
     if settings.get("kav.shutdownPrompt",true) then
       return true
@@ -144,11 +150,6 @@ local function drawAdvancedPrompt(type, o, blocked)
     term.write("> Are you sure you want to reboot?")
   end
 
-  --if blocked then -- Check if the program is on the block list and let the user know
-  --  term.setCursorPos(2,ySize - 3)
-  --  warn("!! This program is known to be malicious")
-  --end
-  
   term.setCursorPos(2,ySize - 2)
   local pass = confirmLoop("")
 
@@ -184,6 +185,9 @@ local function drawNormalPrompt(type, name, blocked) -- you always assume that y
   return confirmLoop("")
 end
 
+
+
+
 kav.prompt = function(type, name, blocked)
   if kav.advancedMenu then
     return drawAdvancedPrompt(type, name, blocked)
@@ -191,11 +195,6 @@ kav.prompt = function(type, name, blocked)
     return drawNormalPrompt(type, name, blocked)
   end
 end
-
-function string.starts(String,Start) --https://stackoverflow.com/questions/22831701/lua-read-beginning-of-a-string
-  return string.sub(String,1,string.len(Start))==Start
-end
-
 
 -- http override
 if http then
@@ -211,6 +210,9 @@ if http then
         tmpO = o
       end
     end
+    if not blocked then
+      return get(url, headers)
+    end
     if blocked and kav.prompt("web", tmpO, blocked) then
       return get(url, headers)
      else
@@ -218,8 +220,6 @@ if http then
     end
   end
 end
-
-
 
 _G.os.shutdown = function()
   if kav.prompt("shutdown",_, false) then
