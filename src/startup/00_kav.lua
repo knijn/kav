@@ -6,7 +6,7 @@ local reboot = _G.os.reboot
 
 local kavServer = "https://raw.githubusercontent.com/knijn/kav/main"
 
-kav = {}
+local kav = {}
 kav.backendVersion = 1.0
 kav.advancedMenu = settings.get("kav.advancedMenu",false)
 
@@ -18,10 +18,9 @@ local function warn(v)
 end
 
 
-
+kav.blockedItems = {}
 local blockedHandle = get(kavServer .. "/blocked.json?cb=" .. os.epoch())
 if not blockedHandle then
-  kav.blockedItems = {}
   warn("WARN: Wasn't able to discover blocked urls from the server") -- Instead of fetching this each time you could save it to disk. That way you could use the local copy as a fallback if the server couldn't be reached.
   print("Trying to find blocked items from disk...")
   if not fs.exists(".blocked") then
@@ -34,9 +33,10 @@ if not blockedHandle then
   print("Was able to recover from disk")
 else
   local fileHandle = fs.open(".blocked","w")
-  fileHandle.write(blockedHandle.readAll())
+  local fileData = blockedHandle.readAll()
+  fileHandle.write(fileData)
   fileHandle.close()
-  kav.blockedItems = textutils.unserialiseJSON(blockedHandle.readAll())
+  kav.blockedItems = textutils.unserialiseJSON(fileData)
 end
 if blockedHandle then
   blockedHandle.close()
@@ -101,8 +101,12 @@ function confirmLoop(...)
   return (input == "y")
 end
 
-local function drawAdvancedPrompt(type, name, blocked)
-  
+local function drawAdvancedPrompt(type, o, blocked)
+  if o then
+    name = o.url or o.paste or "unknown"
+  else
+    name = "unknown"
+  end
   local oldBG = term.getBackgroundColor()
   local oldTXT = term.getTextColor()
   local xSize, ySize = term.getSize()
@@ -200,15 +204,17 @@ if http then
       return get(url, headers)
     end
     local blocked = false
+    local tmpO
     for i,o in pairs(kav.blockedItems.blockedWeb) do
       if o.url == url then
         blocked = true
+        tmpO = o
       end
     end
-    if kav.prompt("web", url, blocked) then
+    if blocked and kav.prompt("web", tmpO, blocked) then
       return get(url, headers)
      else
-     return  false, "URL Blocked by kav"
+       return  false, "URL Blocked by kav"
     end
   end
 end
@@ -216,7 +222,7 @@ end
 
 
 _G.os.shutdown = function()
-  if kav.prompt("shutdown", false) then
+  if kav.prompt("shutdown",_, false) then
     shutdown()
   else
     return
@@ -224,7 +230,7 @@ _G.os.shutdown = function()
 end
 
 _G.os.reboot = function()
-  if kav.prompt("reboot", false) then
+  if kav.prompt("reboot",_, false) then
     reboot()
   else
     return

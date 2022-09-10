@@ -3,6 +3,6 @@
   [ "kav.rebootPrompt" ] = "false",
   [ "kav.pastebinPrompt" ] = true,
   [ "kav.downloadPrompt" ] = true,
-  [ "kav.advancedMenu" ] = false,
+  [ "kav.advancedMenu" ] = true,
   [ "kav.shutdownPrompt" ] = true,
 }

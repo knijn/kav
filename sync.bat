@@ -1,1 +1,1 @@
-scp blocked.json helium:/var/www/up/
+scp blocked.json oxygen:/var/www/up/
